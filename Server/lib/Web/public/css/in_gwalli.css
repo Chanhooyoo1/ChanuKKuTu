@@ -1,0 +1,228 @@
+/**
+ * Rule the words! KKuTu Online
+ * Copyright (C) 2017 JJoriping(op@jjo.kr)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+	디자인 토큰
+	- 배경/카드: 사이트 기존 다크 톤(#444444 계열)을 더 차분하게 다듬은 버전
+	- 포인트: 사이트 상단바에 쓰이는 골드(#DEAF56 / hover #EFC067)를 그대로 계승
+	- 데이터(표, 입력값)는 모노스페이스로 표시해 "원본 데이터를 직접 다루는 콘솔"이라는 느낌을 줌
+*/
+:root {
+	--gwalli-bg: #232326;
+	--gwalli-card: #2E2E32;
+	--gwalli-card-alt: #35353A;
+	--gwalli-border: #45454B;
+	--gwalli-text: #EDEAE3;
+	--gwalli-text-dim: #9C978C;
+	--gwalli-accent: #DEAF56;
+	--gwalli-accent-hover: #EFC067;
+	--gwalli-accent-text: #3A2A0C;
+	--gwalli-danger: #C0605A;
+}
+
+#Middle {
+	max-width: 1240px;
+	margin: 0 auto;
+	padding: 24px 16px 80px;
+	font-family: NBGothic, 돋움, sans-serif;
+	color: var(--gwalli-text);
+}
+
+/* ===== 상단 메뉴바 테두리 (관리 페이지 전용 강조) ===== */
+#Top {
+	border-bottom: 4px solid var(--gwalli-accent);
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== 카드(fieldset) ===== */
+#Middle fieldset {
+	position: relative;
+	margin: 0 0 20px;
+	padding: 20px 20px 22px;
+	border: 1px solid var(--gwalli-border);
+	border-left: 3px solid var(--gwalli-accent);
+	border-radius: 6px;
+	background: var(--gwalli-card);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+#Middle legend {
+	padding: 0 8px 0 0;
+	font-family: var(--gwalli-mono);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	color: var(--gwalli-accent);
+	text-transform: none;
+}
+#Middle legend::before {
+	content: "|  ";
+	color: var(--gwalli-text-dim);
+}
+
+#Middle fieldset > div {
+	margin-top: 12px;
+}
+
+/* ===== 입력창 / 텍스트영역 ===== */
+#Middle input,
+#Middle textarea {
+	box-sizing: border-box;
+	padding: 8px 10px;
+	margin: 0 6px 8px 0;
+	border: 1px solid var(--gwalli-border);
+	border-radius: 4px;
+	background: var(--gwalli-bg);
+	color: var(--gwalli-text);
+	font-family: var(--gwalli-mono);
+	font-size: 13px;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+#Middle input::placeholder,
+#Middle textarea::placeholder {
+	color: var(--gwalli-text-dim);
+}
+#Middle input:focus,
+#Middle textarea:focus {
+	outline: none;
+	border-color: var(--gwalli-accent);
+	box-shadow: 0 0 0 2px rgba(222, 175, 86, 0.25);
+}
+#Middle textarea {
+	display: block;
+	width: 100%;
+	resize: vertical;
+	line-height: 1.5;
+}
+
+/* ===== 버튼 =====
+   그라데이션끼리는 transition: background로 전환해도 부드럽게 보간되지 않아 뚝뚝 끊겨 보입니다.
+   그래서 ::before 의사요소를 겹쳐두고 opacity만 부드럽게 올려서 "색이 스며드는" 느낌을 냅니다. */
+#Middle button {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	padding: 8px 16px;
+	margin: 0 6px 8px 0;
+	border: 1px solid var(--gwalli-accent);
+	border-radius: 4px;
+	background: transparent;
+	color: var(--gwalli-accent);
+	font-family: NBGothic, 돋움, sans-serif;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: color 0.4s ease, box-shadow 0.4s ease, transform 0.05s ease;
+}
+#Middle button::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: linear-gradient(160deg, var(--gwalli-accent-hover), var(--gwalli-accent));
+	opacity: 0;
+	transition: opacity 0.4s ease;
+}
+#Middle button:hover {
+	color: var(--gwalli-accent-text);
+	box-shadow: 0 3px 8px rgba(222, 175, 86, 0.25);
+}
+#Middle button:hover::before {
+	opacity: 1;
+}
+#Middle button:active {
+	transform: translateY(1px);
+	box-shadow: none;
+}
+/* "적용" 계열: 실제 DB에 쓰는 버튼은 항상 채워진 상태(::before가 이미 보임)로 구분 */
+#Middle button[id$="-apply"],
+#Middle button#db-ok {
+	color: var(--gwalli-accent-text);
+	border-color: var(--gwalli-accent);
+}
+#Middle button[id$="-apply"]::before,
+#Middle button#db-ok::before {
+	opacity: 1;
+	background: linear-gradient(160deg, var(--gwalli-accent-hover), var(--gwalli-accent) 60%, #C9963F);
+}
+#Middle button[id$="-apply"]:hover::before,
+#Middle button#db-ok:hover::before {
+	background: linear-gradient(160deg, #F5CC7C, var(--gwalli-accent-hover) 60%, var(--gwalli-accent));
+}
+#Middle button[id$="-apply"]:hover,
+#Middle button#db-ok:hover {
+	border-color: var(--gwalli-accent-hover);
+	box-shadow: 0 4px 10px rgba(222, 175, 86, 0.35);
+}
+
+
+
+/* ===== 표 ===== */
+#Middle table {
+	width: 100%;
+	margin-top: 10px;
+	border-collapse: collapse;
+	font-family: var(--gwalli-mono);
+	font-size: 12.5px;
+}
+#Middle fieldset > div > div {
+	overflow-x: auto;
+	border: 1px solid var(--gwalli-border);
+	border-radius: 4px;
+}
+#Middle thead td {
+	position: sticky;
+	top: 0;
+	padding: 9px 10px;
+	background: var(--gwalli-card-alt);
+	color: var(--gwalli-text-dim);
+	font-weight: 700;
+	text-align: left;
+	white-space: nowrap;
+	border-bottom: 1px solid var(--gwalli-border);
+}
+#Middle tbody td {
+	padding: 7px 10px;
+	border-bottom: 1px solid var(--gwalli-border);
+	vertical-align: middle;
+}
+#Middle tbody tr:nth-child(even) {
+	background: rgba(255, 255, 255, 0.02);
+}
+#Middle tbody tr:hover {
+	background: rgba(222, 175, 86, 0.06);
+}
+#Middle tbody input {
+	width: 100%;
+	min-width: 60px;
+	margin: 0;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+#Middle tbody input:hover {
+	border-color: var(--gwalli-border);
+}
+
+/* ===== 안내 문구가 필요한 자리(비밀번호/테이블 자격) ===== */
+#Middle fieldset:has(#db-password) {
+	border-left-color: var(--gwalli-danger);
+}
+#Middle fieldset:has(#db-password) legend {
+	color: var(--gwalli-danger);
+}

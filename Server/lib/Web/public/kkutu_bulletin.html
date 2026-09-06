@@ -1,0 +1,388 @@
+<head>
+<meta charset="UTF-8">
+<title>차누끄투 패치노트</title>
+<style>
+    :root {
+        --primary-color: #bb86fc;
+        --primary-dark: #7c4dff;
+        --accent-color: rgba(187, 134, 252, 0.2);
+        --text-color: #e0e0e0;
+        --bg-color: #1e1e1e;
+        --feature-color: #7cc4f8;
+        --bugfix-color: #ff8a80;
+        --notice-color: #ffd54f;
+    }
+
+    * { box-sizing: border-box; }
+    html {
+        background: transparent;
+    }
+    body {
+        font-family: 'NanumBarunGothic', -apple-system, sans-serif;
+        background: transparent;
+        margin: 0;
+        padding: 16px 20px 30px;
+        color: var(--text-color);
+        min-height: 100vh;
+    }
+
+    /* 상단 유리 툴바: 검색 + 필터 탭 */
+    .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(30, 30, 30, 0.55);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    #searchInput {
+        flex: 1 1 160px;
+        min-width: 140px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 13px;
+        outline: none;
+        transition: 0.25s;
+    }
+    #searchInput::placeholder { color: rgba(255,255,255,0.4); }
+    #searchInput:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(187, 134, 252, 0.35);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .tab-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #aaa;
+        padding: 7px 14px;
+        cursor: pointer;
+        border-radius: 20px;
+        font-size: 12px;
+        backdrop-filter: blur(5px);
+        transition: 0.25s;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+    .tab-btn.active {
+        background: rgba(187, 134, 252, 0.25);
+        color: #fff;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(187, 134, 252, 0.4);
+    }
+
+    /* 글래스모피즘 카드 */
+    .update-card {
+        background: rgba(99, 99, 99, 0.3);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 22px 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(14px);
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    .update-card.is-hidden { display: none; }
+
+    .update-card:hover {
+        transform: translateY(-5px);
+        background: rgba(99, 99, 99, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+    }
+
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h3.version-title {
+        margin: 0 0 12px;
+        color: #fff;
+        font-size: 1.25em;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+    }
+
+    .tag {
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.62em;
+        font-weight: bold;
+        color: #000;
+        letter-spacing: 0.02em;
+    }
+    .tag-new {
+        background: var(--primary-color);
+        color: #000;
+        box-shadow: 0 0 10px rgba(187, 134, 252, 0.6);
+    }
+    .tag-feature { background: var(--feature-color); }
+    .tag-bugfix  { background: var(--bugfix-color); }
+    .tag-notice  { background: var(--notice-color); }
+
+    ul { margin: 0; padding: 0; }
+    li {
+        list-style: none;
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.6;
+    }
+    li::before {
+        content: '✦';
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+    li mark {
+        background: rgba(187, 134, 252, 0.35);
+        color: #fff;
+        border-radius: 4px;
+        padding: 0 3px;
+    }
+
+    #noResult {
+        text-align: center;
+        color: rgba(255,255,255,0.5);
+        font-size: 13px;
+        padding: 30px 0;
+        display: none;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: rgba(187,134,252,0.4); border-radius: 10px; }
+</style>
+</head>
+<body>
+    <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="공지 내용 검색...">
+        <div class="tab-bar">
+            <button class="tab-btn active" data-filter="all">전체</button>
+            <button class="tab-btn" data-filter="feature">기능 개선</button>
+            <button class="tab-btn" data-filter="bugfix">버그 수정</button>
+            <button class="tab-btn" data-filter="notice">공지</button>
+        </div>
+    </div>
+
+    <div id="cardContainer">
+          <div class="update-card" data-types="feature notice">
+            <h3 class="version-title">1.1b [260829]</h3>
+            <ul>
+                <li>차누끄투 인게임 효과음이 변경되었습니다.</li>
+                <li>한방단어가 아닌 단어가 한방단어로 판정되는 버그가 아직 잔존하는것으로 확인되었습니다. 빠른 시일 내에 고치도록 하겠습니다.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature bugfix notice">
+            <h3 class="version-title">1.0.9b [260825]</h3>
+            <ul>
+                <li>모바일은 컴퓨터와 같은 환경에서 작동하도록 하였습니다.</li>
+                <li>일부 모바일 브라우저는 보안정책 문제로 http가 접속이 되지 않고 막히는것을 확인하였습니다. 이에 따라 사이트를 보안연결 (https)로 전환하였습니다.</li>
+                <li>봇이 고수 이상에서만 작동하는 버그를 고쳤습니다.</li>
+                <li>명령어 목록이 표시되지 않는 버그를 고쳤습니다.</li>
+                <li>한방단어가 아닌 단어가 한방단어로 판정되는 버그를 고쳤습니다. 아직 일부 고쳐지지 않은 부분이 있을 수 있으니 양해 부탁드립니다.</li>
+                <li>이름정의가 되지 않았던 항목을 추가했습니다.</li>
+                <li>끄코 유틸리티의 라이선스 변경으로 인해 하단에 끄코유틸 관련 안내를 추가했습니다.</li>
+                <li>곧 차누끄투 인게임 효과음이 바뀔 예정입니다.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="notice">
+            <h3 class="version-title">1.0.8b [260812]</h3>
+            <ul>
+                <li>모바일에서 접속이 되지 않는다는 얘기를 들었습니다. 빠른 시일 내에 수정 하도록 하겠습니다.</li>
+                <li>그림퀴즈가 정상적으로 작동되지 않습니다. 당분간은 옵션에서 빼놓도록 하겠습니다.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature bugfix">
+            <h3 class="version-title">1.0.7b [260729]</h3>
+            <ul>
+                <li>구) 레전드끄투의 소스코드를 사용함으로써 다양한 게임모드와 옵션이 추가되었습니다.</li>
+                <li>아직 이름 미지정된 옵션이나 버그가 많을 수 있습니다. 양해 부탁드립니다.</li>
+                <li>추가된 기능에는 이런것이 있습니다</li>
+                <li>- 배경음악, 인게임, 효과음 볼륨 조절</li>
+                <li>- 로그아웃하면 별명이 저장되지않던 버그 수정</li>
+                <li>- 배경화면 변경 기능, 레벨 아이콘 변경 기능 (구현 중)</li>
+                <li>- 차단, 신고 시스템 추가</li>
+                <li>- 방 목록 새로고침 기능</li>
+                <li>:: 게임 모드 ::</li>
+                <li>- 한국어 가운뎃말잇기</li>
+                <li>- 한국어 끄투</li>
+                <li>- 모음퀴즈</li>
+                <li>- 전체</li>
+                <li>- 한국어 주제 타자 대결</li>
+                <li>- 한국어 랜덤잇기</li>
+                <li>- 한국어 앞말 쿵쿵따</li>
+                <li>- 스피드퀴즈</li>
+                <li>- 그림퀴즈</li>
+                <li>- 한국어 단어맞추기</li>
+                <li>- 한국어 워드스택</li>
+                <li>:: 특수 규칙 ::</li>
+                <li>- 매너</li>
+                <li>- 랜덤미션</li>
+                <li>- 2글자 금지</li>
+                <li>- 리턴</li>
+                <li>- 랜덤턴</li>
+                <li>- 언노운워드 (Unknown Word)</li>
+                <li>- 워드픽</li>
+                <li>- 무제한</li>
+                <li>- 두음법칙 금지</li>
+                <li>- 3글자</li>
+                <li>- 자유</li>
+                <li>- 특수 단어 허용</li>
+                <li>- 힌트 없음</li>
+                <li>- 어려움</li>
+                <li>- 중도 입장 금지.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature bugfix">
+            <h3 class="version-title">1.0.6b [260625]</h3>
+            <ul>
+                <li>게임 내의 새로운 효과음을 반영하였습니다.</li>
+                <li>그 외 자잘한 버그를 수정 하였습니다.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature bugfix">
+            <h3 class="version-title">1.0.5b [260530]</h3>
+            <ul>
+                <li>게임 내의 새로운 효과음을 반영하였습니다.</li>
+                <li>그 외 자잘한 버그를 수정 하였습니다.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature bugfix">
+            <h3 class="version-title">1.0.4b [260513]</h3>
+            <ul>
+                <li>닉네임 변경 문제가 해결되었습니다. 제 2의 끄투님과 티에프지이님께서 많은 도움을 주셨습니다.</li>
+                <li>랜딩페이지의 로직과 디자인이 많은 변화를 거쳤습니다.</li>
+                <li>(소스코드를 싹 다 갈아엎긴 했음)</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="notice">
+            <h3 class="version-title">1.0.3b [260509]</h3>
+            <ul>
+                <li>현재 닉네임 변경 불가 문제가 있습니다. 빠른 시일 내에 수정하도록 하겠사오니 양해 부탁드립니다.</li>
+                <li>혹시 닉네임 문제 수정법을 알고 계신 분은 아래의 메일로 보내주시면 감사하겠습니다. 항상 차누끄투를 이용해 주셔서 감사드립니다.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature bugfix">
+            <h3 class="version-title">1.0.2b [260503]</h3>
+            <ul>
+                <li>버그 대거 수정, 게임 배경 교체 및 UI 변경.</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="feature">
+            <h3 class="version-title">1.0.1b [260425]</h3>
+            <ul>
+                <li>UI 개편 및 대규모 데이터베이스 업데이트</li>
+                <li>(레벨 인디케이터, 상점 아이템, 상단 메뉴 바, 랜딩페이지 개편 등)</li>
+            </ul>
+        </div>
+        <div class="update-card" data-types="notice">
+            <h3 class="version-title">1.0.0a [260419]</h3>
+            <ul>
+                <li>차누끄투가 공개되었습니다.</li>
+            </ul>
+        </div>
+    </div>
+    <p id="noResult">검색 결과가 없습니다.</p>
+
+<script>
+(function () {
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.update-card'));
+    var searchInput = document.getElementById('searchInput');
+    var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+    var noResult = document.getElementById('noResult');
+    var currentFilter = 'all';
+
+    var RULES = {
+        feature: /UI|개편|업데이트|반영|데이터베이스|효과음|변화|디자인/,
+        bugfix: /버그|수정되었습니다|해결되었|문제.*해결/,
+        notice: /양해|메일로 보내주시면|공개되었습니다|감사드립니다/
+    };
+
+    var TAG_LABEL = { feature: '기능 개선', bugfix: '버그 수정', notice: '공지' };
+
+    cards.forEach(function (card, index) {
+        card.style.animationDelay = (index * 0.06) + 's';
+
+        var title = card.querySelector('.version-title');
+
+        // 기존 태그 제거 (중복 방지)
+        title.querySelectorAll('.tag').forEach(function (el) { el.remove(); });
+
+        var text = card.querySelector('ul').textContent;
+        var types = [];
+        Object.keys(RULES).forEach(function (key) {
+            if (RULES[key].test(text)) types.push(key);
+        });
+        if (types.length === 0) types.push('notice');
+        card.dataset.types = types.join(' ');
+
+        types.forEach(function (t) {
+            var span = document.createElement('span');
+            span.className = 'tag tag-' + t;
+            span.textContent = TAG_LABEL[t];
+            title.appendChild(span);
+        });
+
+        if (index === 0) {
+            var newTag = document.createElement('span');
+            newTag.className = 'tag tag-new';
+            newTag.textContent = 'NEW';
+            title.appendChild(newTag);
+        }
+    });
+
+    function applyFilters() {
+        var query = searchInput.value.trim().toLowerCase();
+        var visibleCount = 0;
+
+        cards.forEach(function (card) {
+            var typeMatch = currentFilter === 'all' ||
+                card.dataset.types.split(' ').indexOf(currentFilter) !== -1;
+            var textMatch = !query || card.textContent.toLowerCase().indexOf(query) !== -1;
+
+            if (typeMatch && textMatch) {
+                card.classList.remove('is-hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('is-hidden');
+            }
+        });
+
+        noResult.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            tabButtons.forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            applyFilters();
+        });
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+})();
+</script>
+</body>
